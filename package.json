@@ -1,0 +1,17 @@
+{
+  "name": "webservice",
+  "version": "1.0.0",
+  "description": "",
+  "main": "action_schema.js",
+  "dependencies": {
+    "express": "^4.12.4",
+    "mongoose": "^3.9.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "chen shamir",
+  "license": "ISC"
+}
