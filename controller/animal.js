@@ -2,7 +2,17 @@
 var mongoose = require('mongoose'),
     userM = mongoose.model('User'),
     url = require('url'),
-    userCon = require('./user');
+    userCon = require('./user'),
+    fs = require('fs'),
+    formidable = require('formidable'),
+    cloudinary = require('cloudinary');
+
+cloudinary.config({
+    cloud_name: 'dmsnaesos',
+    api_key: '721548917261634',
+    api_secret: 'P8jfvTFY92Wq_-PYOY7E3mspbv8'
+});
+
 
 /*
  function for New animal
@@ -35,6 +45,69 @@ function setAnimal(animalName,animalAge,animalWeight,animalPic, callback) {
         }
     });
 }
+
+
+function FilesArrayIsEmpty(files){
+    if (files !== undefined) {
+        console.log("Im returning 1");
+        return 1;
+    }
+    console.log("Im returning 0");
+    return 0;
+}
+
+exports.uploadAnimalImg = function(req,res){
+        console.log("In upload img route\n");
+        console.log("req files:"+req.files);
+        var dataForm = {};
+        var form = new formidable.IncomingForm();
+        var ImageSend = false;
+        var defaultUrl = "http://s11.postimg.org/ypkjkrdz7/album.png"; // default pic
+        var app = req.app;
+        console.log("this is app: "+app);
+    console.log("this is req: "+req);
+        form.parse(req, function(error, fields, files) {
+            console.log('-->PARSE<--');
+            dataForm = fields;  //save the fields information
+            console.log("this is files:"+files);
+            if (FilesArrayIsEmpty(files)){
+                console.log("in IF FilesArrayIsEmpty");
+                ImageSend = true;
+            }
+        });
+
+        form.on('error', function(err) {
+            console.log("in form on error " + err);
+
+        });
+
+        form.on('end', function(error, fields, files) {
+           console.log("form on event");
+            if (ImageSend) {
+                console.log("image send is true");
+                var temp_path = this.openedFiles[0].path;
+                console.log("req files:"+form.path);
+                console.log("req files:"+req.files);
+
+                console.log("this is temp path:" + temp_path);
+                var stream = cloudinary.uploader.upload_stream(function(response) {
+                    console.log("in result from cloudinary");
+                    var urlImg=response.url;
+                    console.log("this is the image url:"+urlImg);
+                            res.json(urlImg);
+
+                });
+               var file_reader = fs.createReadStream(temp_path).pipe(stream);
+           }
+            else {
+                console.log("return some defult url image");
+        //                res.json(urlImg);
+        //            });
+           }
+        });
+
+};
+
 
 
 exports.setNewAnimal = function(req,res){
