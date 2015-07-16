@@ -322,3 +322,53 @@ function templateCallback(err,data) {
     }
 }
 */
+
+function deleteItemComplexDetailFromDB(animalId,typeComplexDetail,itemId, callback) {
+    var authenticateUser = userCon.getAuthenticateUser();
+    var deleteItemQuery;   
+    if (typeComplexDetail == "vacc") 
+        deleteItemQuery = userM.findOneAndUpdate(
+            { "_id" : authenticateUser._id, "animals._id" : animalId},
+            { $pull : {"animals.$.animalVaccination": { _id : itemId}  }}
+        );
+    else if (typeComplexDetail == "food")
+        deleteItemQuery = userM.findOneAndUpdate(
+            { "_id" : authenticateUser._id, "animals._id" : animalId},
+            { $pull : {"animals.$.animalFood": { _id : itemId}  }}
+        );
+    else if (typeComplexDetail == "care") 
+    // not just else to ensure that the type is correct
+        deleteItemQuery = userM.findOneAndUpdate(
+            { "_id" : authenticateUser._id, "animals._id" : animalId},
+            { $pull : {"animals.$.animalCare": { _id : itemId}  }}
+        );
+
+    deleteItemQuery.exec(function(err, results) {
+        console.log("Number of updated values: "+results);
+        // update the 'authenticateUser' from mongo
+        userM.findOne({'email':authenticateUser.email}, function(err, doc) {
+            authenticateUser = doc;
+            //console.log("doc: " + authenticateUser);
+            callback(err,authenticateUser);
+        });
+    });
+}
+
+exports.deleteItemComplexDetail = function(req,res){
+    console.log("animal controller - deleteItemComplexDetail()");
+    var url_parts = url.parse(req.url, true);
+    var query = url_parts.query;
+
+    var animalId = query.animalId;
+    var typeComplexDetail = query.typeComplexDetail;
+    var itemId = query.itemId;
+    deleteItemComplexDetailFromDB(animalId,typeComplexDetail,itemId, function(err,data) {
+        if (err)
+            res.send(500, "something went wrong: "+err);
+        else {
+            // we return the updated user
+            res.status(200);
+            res.json(data);
+        }
+    });
+};

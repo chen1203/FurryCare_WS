@@ -11,6 +11,7 @@ module.exports = function(app){
     app.get('/getUser', userRoutes.getUser);
     /* notification */
     app.get('/addNewNoti',notificationRoutes.addNewNotification);
+    app.get('/deleteNoti',notificationRoutes.deleteNotification);
     /* animal */
     app.get('/setAnimalField',animalRoutes.setAnimalField);
     app.get('/setNewAnimal',animalRoutes.setNewAnimal);
@@ -19,4 +20,6 @@ module.exports = function(app){
     app.get('/addNewFood',animalRoutes.addNewFood);
     app.get('/addNewVacc',animalRoutes.addNewVacc);
     app.get('/addNewCare',animalRoutes.addNewCare);
+
+    app.get('/deleteItemComplexDetail',animalRoutes.deleteItemComplexDetail);
 };
