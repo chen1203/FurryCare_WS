@@ -9,9 +9,10 @@
  // Use the Express application instance to listen to the port
  //app.listen(process.env.PORT || 3000);
 
- console.log('server is listening');
- app.listen(3000);
- console.log("listening on port 3000 \n\n");
+// console.log('server is listening');
+//app.listen(3000);
+//console.log("listening on port 3000 \n\n");
+app.listen(process.env.PORT || 3000);
 
 
 //var express = require('express');
