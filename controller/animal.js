@@ -210,9 +210,14 @@ function deleteAnimalDB(animalId,callback) {
 
     var deleteQuery = userM.findOneAndUpdate(
             { "_id" : authenticateUser._id},
-            { $pull: {"animals": { _id : animalId }},
-              $pull: {"notifications": {animalId : animalId}}
-        });
+            {  $and : [
+                    { $pull: {"animals": { _id : animalId }}},
+                    { $pull: {"notifications": {animalId : animalId}}}
+                ]
+            }
+    );
+
+    db.collection.update( { "Queries.Results.id":1 }, { $pull: { "Queries.$.Results": {"id":1} } } )
 
     deleteQuery.exec(function(err, results) {
         console.log("updated values: "+results);
