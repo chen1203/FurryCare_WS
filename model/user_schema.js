@@ -51,7 +51,7 @@ var userSchema = new schema({
             animalId : {type: String},
             notiType: {type: String},
             notiName: {type: String, required: true}, 
-            notiReceivedDate: {type: String, required: true},
+            notiReceivedDate: {type: Date, required: true},
             notiExpiredDate: {type: Date, required: true}
         }
     ]
