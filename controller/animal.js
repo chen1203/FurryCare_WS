@@ -205,29 +205,23 @@ exports.setAnimalField = function(req,res){
  */
 
 function deleteAnimalDB(animalId,callback) {
-    var authenticateUser = userCon.getAuthenticateUser();
-    var query = userM.findOne({'email':authenticateUser.email});
-    query.exec(function(err,doc) {
-        if (err)
-            console.log("error on set animal :\n "+err);
-        else {
-            console.log("user id : "+doc._id);
-            console.log("animal id: "+animalId);
+    var authenticateUser = userCon.getAuthenticateUser();  
+    console.log("animal id: "+animalId);
 
-            var deleteQuery = userM.findOneAndUpdate(
-                { "_id" : doc._id},
-                {$pull: {"animals": { _id : animalId }}});
+    var deleteQuery = userM.findOneAndUpdate(
+            { "_id" : authenticateUser._id},
+            { $pull: {"animals": { _id : animalId }},
+              $pull: {"notifications": {animalId : animalId}}
+        });
 
-            deleteQuery.exec(function(err, results) {
-                console.log("updated values: "+results);
-                // update the 'authenticateUser' from mongo
-                userM.findOne({'email':authenticateUser.email}, function(err, doc2) {
-                    authenticateUser = doc2;
-                    console.log("doc: " + authenticateUser);
-                    callback(err,authenticateUser);
-                });
-            });
-        }
+    deleteQuery.exec(function(err, results) {
+        console.log("updated values: "+results);
+        // update the 'authenticateUser' from mongo
+        userM.findOne({'email':authenticateUser.email}, function(err, doc) {
+            authenticateUser = doc;
+            console.log("doc: " + authenticateUser);
+            callback(err,authenticateUser);
+        });
     });
 }
 
