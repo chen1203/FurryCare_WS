@@ -210,14 +210,27 @@ function deleteAnimalDB(animalId,callback) {
 
     var deleteQuery = userM.findOneAndUpdate(
             { "_id" : authenticateUser._id},
-            {  $and : [
-                    { $pull: {"animals": { _id : animalId }}},
-                    { $pull: {"notifications": {animalId : animalId}}}
-                ]
-            }
-    );
+            { $pull: {"animals": { _id : animalId }}}
+        );
 
-    db.collection.update( { "Queries.Results.id":1 }, { $pull: { "Queries.$.Results": {"id":1} } } )
+    deleteQuery.exec(function(err, results) {
+        console.log("updated values: "+results);
+        // update the 'authenticateUser' from mongo
+        userM.findOne({'email':authenticateUser.email}, function(err, doc) {
+            authenticateUser = doc;
+            console.log("doc: " + authenticateUser);
+            callback(err,authenticateUser);
+        });
+    });
+}
+
+function deleteAnimalNotifications(animalId,callback) {
+    var authenticateUser = userCon.getAuthenticateUser();  
+    console.log("animal id: "+animalId);
+    var deleteQuery = userM.findOneAndUpdate(
+            { "_id" : authenticateUser._id},
+            { $pull: {"notifications": {animalId : animalId}}}
+        );
 
     deleteQuery.exec(function(err, results) {
         console.log("updated values: "+results);
@@ -240,8 +253,12 @@ exports.deleteAnimal = function(req,res){
         if (err)
             res.send(500, "something went wrong: "+err);
         else {
-            // we return the updated user
-            res.status(200).json(data);
+            deleteAnimalNotifications(animalId, function(err,data) {
+            if (err)
+                res.send(500, "something went wrong: "+err);
+            else  // we return the updated user
+                res.status(200).json(data);
+            });
         }
     });
 };
