@@ -3,7 +3,7 @@ var express = require('express');
 module.exports = function() {
     var app = express();
 
-    //response configuration
+    // response configuration
     app.set('json spaces',4);
     app.use(function(req, res, next) {
        /* res.header('Access-Control-Allow-Origin', 'http://shenkar.html5-book.co.il');*/
@@ -14,12 +14,10 @@ module.exports = function() {
         next();
     });
 
-    // Get routes
+    // get routes
     require('./routesConfig')(app);
-
     app.use(express.static('../public'));
-
-    //return instance
+    // return instance
     return app;
 };
 

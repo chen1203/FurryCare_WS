@@ -1,4 +1,3 @@
-
 var userRoutes = require('../controller/user.js');
 var animalRoutes = require('../controller/animal.js');
 var notificationRoutes = require('../controller/notification.js');
