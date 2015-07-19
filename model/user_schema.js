@@ -49,6 +49,7 @@ var userSchema = new schema({
     notifications: [ 
         { 
             animalId : {type: String},
+            detailConnectedId : {type: String},
             notiType: {type: String},
             notiName: {type: String, required: true}, 
             notiReceivedDate: {type: Date, default: Date.now, required: true},

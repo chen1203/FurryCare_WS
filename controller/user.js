@@ -1,7 +1,9 @@
 // Load the module dependencies
 var mongoose = require('mongoose'),
     userM = mongoose.model('User'),
-    url = require('url');
+    url = require('url'),
+    notificationCon = require('./notification');
+
 // hold the user
 var authenticateUser;
 
@@ -21,27 +23,6 @@ function authenticate(userMail, callback) {
 exports.getAuthenticateUser = function(){
     return authenticateUser;
 };
- 
-function deleteNotiPassed(callback) {
-    //var authenticateUser = userCon.getAuthenticateUser();
-    var currentDate = new Date();
-    var deleteNotiQuery = userM.findOneAndUpdate(
-                { "_id" : authenticateUser._id},
-                { $pull : {"notifications": { notiReceivedDate : {$lt : currentDate},
-                                              notiExpiredDate : {$lt : currentDate}
-                                            }  
-                            }});
-
-    deleteNotiQuery.exec(function(err, results) {
-        console.log("Number of updated values: "+results);
-        // update the 'authenticateUser' from mongo
-        userM.findOne({'email':authenticateUser.email}, function(err, doc) {
-            authenticateUser = doc;
-            console.log("doc: " + authenticateUser);
-            callback(err,authenticateUser);
-        });
-    });
-}
 
 exports.getUser = function(req,res){
     console.log("user controller - getUser()");
@@ -56,7 +37,7 @@ exports.getUser = function(req,res){
             console.log("error is null.");
 
             // delete noties....
-            deleteNotiPassed(function(err,data) {
+            notificationCon.deleteNotiPassed(function(err,data) {
                 if (err)
                     res.send(500, "something went wrong: "+err);
                 else {

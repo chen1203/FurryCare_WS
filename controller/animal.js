@@ -3,6 +3,7 @@ var mongoose = require('mongoose'),
     userM = mongoose.model('User'),
     url = require('url'),
     userCon = require('./user'),
+    notificationCon = require('./notification'),
     fs = require('fs'),
     formidable = require('formidable'),
     cloudinary = require('cloudinary');
@@ -455,9 +456,14 @@ exports.deleteItemComplexDetail = function(req,res){
         if (err)
             res.send(500, "something went wrong: "+err);
         else {
-            // we return the updated user
-            res.status(200);
-            res.json(data);
+            //  delete this item notification if exist
+            notificationCon.deleteNotiByConnectedDetailId(itemId, function(err,data) {
+                 if (err)
+                    res.send(500, "something went wrong: "+err);
+                else 
+                    // we return the updated user
+                    res.status(200).json(data);        
+            });
         }
     });
 };
