@@ -26,9 +26,11 @@ function deleteNotiPassed(callback) {
     //var authenticateUser = userCon.getAuthenticateUser();
     var currentDate = new Date();
     var deleteNotiQuery = userM.findOneAndUpdate(
-                        { "_id" : authenticateUser._id},
-                        { $pull : {"notifications": { notiReceivedDate : {$lt : currentDate}}  }}
-                    );
+                { "_id" : authenticateUser._id},
+                { $pull : {"notifications": { notiReceivedDate : {$lt : currentDate},
+                                              notiExpiredDate : {$lt : currentDate}
+                                            }  
+                            }});
 
     deleteNotiQuery.exec(function(err, results) {
         console.log("Number of updated values: "+results);
