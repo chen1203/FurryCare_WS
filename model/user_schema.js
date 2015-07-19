@@ -34,15 +34,7 @@ var userSchema = new schema({
                     careDate: {type: Date, default: Date.now},
                    	careExp:  {type: Date}
                 }
-            ],
-            animalService: [
-                {
-                    serviceName: {type: String},
-                    serviceType: {type: String},
-                    serviceAddress: {type: String}
-                }
-            ],
-            animalMunicipalLicensing: {type: Date, default: Date.now}
+            ]
         },
       
     ],
