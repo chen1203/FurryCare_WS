@@ -60,6 +60,8 @@ function FilesArrayIsEmpty(files){
 exports.uploadAnimalImg = function(req,res){
         console.log("In upload img route\n");
         console.log("req files:"+req.files);
+        res.header('Access-Control-Allow-Origin', 'http://shenkar.html5-book.co.il');
+        res.header('Access-Control-Allow-Credentials', 'true');  
         var dataForm = {};
         var form = new formidable.IncomingForm();
         var ImageSend = false;
@@ -104,7 +106,7 @@ exports.uploadAnimalImg = function(req,res){
                 console.log("return some defult url image");
         //                res.json(urlImg);
         //            });
-           }
+           } 
         });
 
 };

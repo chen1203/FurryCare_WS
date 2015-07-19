@@ -6,14 +6,10 @@
  var db = mongoose();
  var app = express();
 
- // Use the Express application instance to listen to the port
- //app.listen(process.env.PORT || 3000);
 
-// console.log('server is listening');
-//app.listen(3000);
-//console.log("listening on port 3000 \n\n");
-app.listen(process.env.PORT || 3000);
-
+var port = process.env.PORT || 3000;
+app.listen(port);
+console.log("listening on port "+port+"...\n\n");
 
 //var express = require('express');
 //var app = express();
