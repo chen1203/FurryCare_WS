@@ -9,13 +9,7 @@ module.exports = function() {
         
        /* res.header('Access-Control-Allow-Origin', 'http://localhost:8080');*/
         res.header('Access-Control-Allow-Origin',"*");
-
-
-
-       /* res.header('Access-Control-Allow-Origin', 'http://shenkar.html5-book.co.il');*/
-
-
-        
+       /* res.header('Access-Control-Allow-Origin', 'http://shenkar.html5-book.co.il');*/ 
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         res.header('Access-Control-Allow-Credentials', 'true');
         res.set("Content-Type", "application/json");

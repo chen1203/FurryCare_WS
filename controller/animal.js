@@ -60,8 +60,9 @@ function FilesArrayIsEmpty(files){
 exports.uploadAnimalImg = function(req,res){
         console.log("In upload img route\n");
         console.log("req files:"+req.files);
-        res.header('Access-Control-Allow-Origin', 'http://shenkar.html5-book.co.il');
-        res.header('Access-Control-Allow-Credentials', 'true');  
+        
+        /*res.header('Access-Control-Allow-Origin', 'http://shenkar.html5-book.co.il');*/
+        
         var dataForm = {};
         var form = new formidable.IncomingForm();
         var ImageSend = false;
@@ -97,7 +98,8 @@ exports.uploadAnimalImg = function(req,res){
                     console.log("in result from cloudinary");
                     var urlImg=response.url;
                     console.log("this is the image url:"+urlImg);
-                            res.json(urlImg);
+                  /*  res.header('Access-Control-Allow-Origin', 'http://shenkar.html5-book.co.il');*/
+                    res.json(urlImg);
 
                 });
                var file_reader = fs.createReadStream(temp_path).pipe(stream);
