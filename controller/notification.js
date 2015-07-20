@@ -1,12 +1,9 @@
-// load the module dependencies
+// Load the module dependencies
 var mongoose = require('mongoose'),
     userM = mongoose.model('User'),
     url = require('url'),
     userCon = require('./user');
 
-/**** notifications functions in ws ****/
-
-/* add new notification to user in mongo */
 function addNotiFromDB(animalId,objId,notiType,notiName,notiReceivedDate,notiExpiredDate, callback) {
     var authenticateUser = userCon.getAuthenticateUser();
     console.log("on set Noti");
@@ -25,10 +22,39 @@ function addNotiFromDB(animalId,objId,notiType,notiName,notiReceivedDate,notiExp
     addNotiQuery.exec(function(err, results) {
         console.log("Number of updated values: "+results);
         // update the 'authenticateUser' from mongo
-        userM.findOne({'email':authenticateUser.email}, userCon.updateUserCallback(err, doc, callback));
+        userM.findOne({'email':authenticateUser.email}, function(err, doc) {
+            authenticateUser = doc;
+            console.log("doc: " + authenticateUser);
+            callback(err,authenticateUser);
+        });
     });
 }
-/* delete notification from user by notification id in mongo */
+
+exports.addNewNotification = function(req,res){
+    console.log("notification controller - addNewNotification()");
+    var url_parts = url.parse(req.url, true);
+    var query = url_parts.query;
+
+    var animalId = query.animalId;
+    var objId = query.objId;
+    var notiType = query.notiType;
+    var notiName = query.notiName;
+    var notiReceivedDate = query.notiReceivedDate;
+    var notiExpiredDate = query.notiExpiredDate;
+    //console.log("new alarm reported: \nAlarm Type: "+query.alarmtype+"\nAlarm Name: "+query.alarmname+"\nExp. Date: "+query.expdate);
+    // Create and push the alarm to db here!!
+    addNotiFromDB(animalId,objId,notiType,notiName,notiReceivedDate,notiExpiredDate, function(err,data) {
+        if (err)
+            res.send(500, "something went wrong: "+err);
+        else {
+            // we return the updated user
+            res.status(200);
+            res.json(data);
+        }
+    });
+};
+
+
 function deleteNotiFromDB(notiId, callback) {
     var authenticateUser = userCon.getAuthenticateUser();
     var deleteNotiQuery = userM.findOneAndUpdate(
@@ -38,32 +64,31 @@ function deleteNotiFromDB(notiId, callback) {
     deleteNotiQuery.exec(function(err, results) {
         console.log("Number of updated values: "+results);
         // update the 'authenticateUser' from mongo
-        userM.findOne({'email':authenticateUser.email}, userCon.updateUserCallback(err, doc, callback));
+        userM.findOne({'email':authenticateUser.email}, function(err, doc) {
+            authenticateUser = doc;
+            console.log("doc: " + authenticateUser);
+            callback(err,authenticateUser);
+        });
     });
 }
 
-/**** notifications functions exported in ws ****/
-
-/* add new notification to user */
-exports.addNewNotification = function(req,res){
-    console.log("Notification controller - addNewNotification()");
-    var url_parts = url.parse(req.url, true);
-    var query = url_parts.query;
-    var animalId = query.animalId;
-    var objId = query.objId;
-    var notiType = query.notiType;
-    var notiName = query.notiName;
-    var notiReceivedDate = query.notiReceivedDate;
-    var notiExpiredDate = query.notiExpiredDate;
-    addNotiFromDB(animalId,objId,notiType,notiName,notiReceivedDate,notiExpiredDate, userCon.templateResponseCallback(err,data));
-};
 exports.deleteNotificationByNotiId = function(req,res){
-    console.log("Notification controller - deleteNotificationByNotiId()");
+    console.log("notification controller - deleteNotification()");
     var url_parts = url.parse(req.url, true);
     var query = url_parts.query;
+
     var notiId = query.notiId;
-    deleteNotiFromDB(notiId, userCon.templateResponseCallback(err,data));
+    deleteNotiFromDB(notiId, function(err,data) {
+        if (err)
+            res.send(500, "something went wrong: "+err);
+        else {
+            // we return the updated user
+            res.status(200);
+            res.json(data);
+        }
+    });
 };
+
 exports.deleteNotiPassed = function(callback) {
     var authenticateUser = userCon.getAuthenticateUser();
     var currentDate = new Date();
@@ -74,22 +99,32 @@ exports.deleteNotiPassed = function(callback) {
                           notiExpiredDate : {$lt : currentDate}
                         }  
                 }});
-    deleteNotiQuery.exec( function(err, results) {
+
+    deleteNotiQuery.exec(function(err, results) {
         console.log("Number of updated values: "+results);
         // update the 'authenticateUser' from mongo
-        userM.findOne({'email':authenticateUser.email}, userCon.updateUserCallback(err, doc, callback));
+        userM.findOne({'email':authenticateUser.email}, function(err, doc) {
+            authenticateUser = doc;
+            console.log("doc: " + authenticateUser);
+            callback(err,authenticateUser);
+        });
     });
 };
+
 exports.deleteNotiByConnectedDetailId = function(detailConnectedId, callback) {
     var authenticateUser = userCon.getAuthenticateUser();
     var deleteNotiQuery = userM.findOneAndUpdate(
                 { "_id" : authenticateUser._id},
                 { $pull : {"notifications": {detailConnectedId : detailConnectedId}}
         });
+
     deleteNotiQuery.exec(function(err, results) {
         console.log("Number of updated values: "+results);
         // update the 'authenticateUser' from mongo
-        userM.findOne({'email':authenticateUser.email}, userCon.updateUserCallback(err, doc, callback));
+        userM.findOne({'email':authenticateUser.email}, function(err, doc) {
+            authenticateUser = doc;
+            console.log("doc: " + authenticateUser);
+            callback(err,authenticateUser);
+        });
     });
 };
-
