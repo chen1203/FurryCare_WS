@@ -41,8 +41,6 @@ exports.addNewNotification = function(req,res){
     var notiName = query.notiName;
     var notiReceivedDate = query.notiReceivedDate;
     var notiExpiredDate = query.notiExpiredDate;
-    //console.log("new alarm reported: \nAlarm Type: "+query.alarmtype+"\nAlarm Name: "+query.alarmname+"\nExp. Date: "+query.expdate);
-    // Create and push the alarm to db here!!
     addNotiFromDB(animalId,objId,notiType,notiName,notiReceivedDate,notiExpiredDate, function(err,data) {
         if (err)
             res.send(500, "something went wrong: "+err);

@@ -18,7 +18,6 @@ cloudinary.config({
 /*
  function for New animal
  */
-
 function setAnimal(animalName,animalAge,animalWeight,animalPic, callback) {
     var authenticateUser = userCon.getAuthenticateUser();
     console.log("on setAnimal");
@@ -60,13 +59,9 @@ function FilesArrayIsEmpty(files){
 exports.uploadAnimalImg = function(req,res){
         console.log("In upload img route\n");
         console.log("req files:"+req.files);
-        
-        /*res.header('Access-Control-Allow-Origin', 'http://shenkar.html5-book.co.il');*/
-        
         var dataForm = {};
         var form = new formidable.IncomingForm();
         var ImageSend = false;
-        var defaultUrl = "http://s11.postimg.org/ypkjkrdz7/album.png"; // default pic
         var app = req.app;
         console.log("this is app: "+app);
     console.log("this is req: "+req);
@@ -98,22 +93,13 @@ exports.uploadAnimalImg = function(req,res){
                     console.log("in result from cloudinary");
                     var urlImg=response.url;
                     console.log("this is the image url:"+urlImg);
-                  /*  res.header('Access-Control-Allow-Origin', 'http://shenkar.html5-book.co.il');*/
                     res.json(urlImg);
 
                 });
                var file_reader = fs.createReadStream(temp_path).pipe(stream);
            }
-            else {
-                console.log("return some defult url image");
-        //                res.json(urlImg);
-        //            });
-           } 
         });
-
 };
-
-
 
 exports.setNewAnimal = function(req,res){
     console.log("animal controlle - setNewAnimal()");
@@ -136,8 +122,6 @@ exports.setNewAnimal = function(req,res){
         }
     });
 };
-
-
 
 /*
  function for set animal fields
@@ -399,23 +383,6 @@ function addNewRec(pushQuery,callback) {
         });
     });
 }
-
-
-
-/* callback instead of the few rows written several times..
-    I didnt try it yet, we need to decide what we are going to do with all the errors 
-*/
-
-/*
-function templateCallback(err,data) {
-    if (err)
-        res.send(500, "something went wrong: "+err);
-    else {
-        // we return the updated user
-        res.status(200).json(data);
-    }
-}
-*/
 
 function deleteItemComplexDetailFromDB(animalId,typeComplexDetail,itemId, callback) {
     var authenticateUser = userCon.getAuthenticateUser();
