@@ -10,7 +10,14 @@ var userSchema = new schema({
             animalName: {type: String},
             animalAge: {type: Number},
             animalWeight: {type: Number},
-            animalPic: {type: String},  //add default
+            animalPic: {type: String},  
+            animalVaccination: [
+                {
+                    vaccName: {type: String},
+                    vaccDate: {type: Date, default: Date.now},
+                    vaccExp: {type: Date}
+                }
+            ],
             animalFood: [
                 {
                     foodName: {type: String},
@@ -19,13 +26,6 @@ var userSchema = new schema({
                     foodBagPrice: {type: Number},
                     foodDailyUsage: {type: Number},
                     foodDate: {type: Date, default: Date.now}
-                }
-            ],
-            animalVaccination: [
-                {
-                    vaccName: {type: String},
-                    vaccDate: {type: Date, default: Date.now},
-                    vaccExp: {type: Date}
                 }
             ],
             animalCare: [
@@ -48,8 +48,6 @@ var userSchema = new schema({
             notiExpiredDate: {type: Date, default: Date.now, required: true}
         }
     ]
-
 	}, {collection: 'furrycare'});
 
 mongoose.model('User',userSchema);
-//exports.userSchema = userSchema;

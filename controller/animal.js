@@ -1,4 +1,4 @@
-// Load the module dependencies
+// load the module dependencies
 var mongoose = require('mongoose'),
     userM = mongoose.model('User'),
     url = require('url'),
@@ -14,10 +14,7 @@ cloudinary.config({
     api_secret: 'P8jfvTFY92Wq_-PYOY7E3mspbv8'
 });
 
-
-/*
- function for New animal
- */
+/**** animals functions in ws ****/
 
 function setAnimal(animalName,animalAge,animalWeight,animalPic, callback) {
     var authenticateUser = userCon.getAuthenticateUser();
@@ -37,18 +34,12 @@ function setAnimal(animalName,animalAge,animalWeight,animalPic, callback) {
             query.exec(function(err, results) {
                 console.log("Number of updated values: "+results);
                 // update the 'authenticateUser' from mongo
-                userM.findOne({'email':authenticateUser.email}, function(err, doc2) {
-                    authenticateUser = doc2;
-                    console.log("doc: " + authenticateUser);
-                    callback(err,authenticateUser);
-                });
+                userM.findOne({'email':authenticateUser.email}, userCon.updateUserCallback(err, doc, callback));
             });
         }
     });
 }
-
-
-function FilesArrayIsEmpty(files){
+function filesArrayIsEmpty(files){
     if (files !== undefined) {
         console.log("Im returning 1");
         return 1;
@@ -56,89 +47,6 @@ function FilesArrayIsEmpty(files){
     console.log("Im returning 0");
     return 0;
 }
-
-exports.uploadAnimalImg = function(req,res){
-        console.log("In upload img route\n");
-        console.log("req files:"+req.files);
-        
-        /*res.header('Access-Control-Allow-Origin', 'http://shenkar.html5-book.co.il');*/
-        
-        var dataForm = {};
-        var form = new formidable.IncomingForm();
-        var ImageSend = false;
-        var defaultUrl = "http://s11.postimg.org/ypkjkrdz7/album.png"; // default pic
-        var app = req.app;
-        console.log("this is app: "+app);
-    console.log("this is req: "+req);
-        form.parse(req, function(error, fields, files) {
-            console.log('-->PARSE<--');
-            dataForm = fields;  //save the fields information
-            console.log("this is files:"+files);
-            if (FilesArrayIsEmpty(files)){
-                console.log("in IF FilesArrayIsEmpty");
-                ImageSend = true;
-            }
-        });
-
-        form.on('error', function(err) {
-            console.log("in form on error " + err);
-
-        });
-
-        form.on('end', function(error, fields, files) {
-           console.log("form on event");
-            if (ImageSend) {
-                console.log("image send is true");
-                var temp_path = this.openedFiles[0].path;
-                console.log("req files:"+form.path);
-                console.log("req files:"+req.files);
-
-                console.log("this is temp path:" + temp_path);
-                var stream = cloudinary.uploader.upload_stream(function(response) {
-                    console.log("in result from cloudinary");
-                    var urlImg=response.url;
-                    console.log("this is the image url:"+urlImg);
-                  /*  res.header('Access-Control-Allow-Origin', 'http://shenkar.html5-book.co.il');*/
-                    res.json(urlImg);
-
-                });
-               var file_reader = fs.createReadStream(temp_path).pipe(stream);
-           }
-            else {
-                console.log("return some defult url image");
-        //                res.json(urlImg);
-        //            });
-           } 
-        });
-
-};
-
-
-
-exports.setNewAnimal = function(req,res){
-    console.log("animal controlle - setNewAnimal()");
-    var url_parts = url.parse(req.url, true);
-    var query1 = url_parts.query;
-    // same variables for all alarms
-    var animalName = query1.animalName;
-    var animalAge = query1.animalAge;
-    var animalWeight = query1.animalWeight;
-    var animalPic = query1.animalPic;
-    console.log("new animal reported: \nAnimal name: "+animalName+"\nanimal age: "+animalAge+"\nanimal pic: "+animalPic+"\n");
-    // Create and push the alarm to db here!!
-   setAnimal(animalName,animalAge,animalWeight,animalPic, function(err,data) {
-        if (err)
-            res.send(500, "something went wrong: "+err);
-        else {
-            // we return the updated user
-            res.status(200);
-            res.json(data);
-        }
-    });
-};
-
-
-
 /*
  function for set animal fields
   */
@@ -173,42 +81,14 @@ function setField(field,animalId,animalNewVal,callback) {
             updateQuery.exec(function(err, results) {
                 console.log("updated values: "+results);
                 // update the 'authenticateUser' from mongo
-                userM.findOne({'email':authenticateUser.email}, function(err, doc2) {
-                    authenticateUser = doc2;
-                    console.log("doc: " + authenticateUser);
-                    callback(err,authenticateUser);
-                });
+                userM.findOne({'email':authenticateUser.email}, userCon.updateUserCallback(err, doc, callback));
             });
         }
     });
 }
-
-
-exports.setAnimalField = function(req,res){
-    console.log("animal controller - setAnimalField()");
-    var url_parts = url.parse(req.url, true);
-    var query = url_parts.query;
-    var field = query.field;
-    var animalId = query.animalId;
-    var animalNewVal = query.animalNewVal;
-
-    console.log("update animal "+field+" to: "+animalNewVal+"\n");
-    // update animal field to db here!!
-    setField(field,animalId,animalNewVal, function(err,data) {
-        if (err)
-            res.send(500, "something went wrong: "+err);
-        else {
-            // we return the updated user
-            res.status(200)
-            res.json(data);
-        }
-    });
-};
-
 /*
  function for delete animal
  */
-
 function deleteAnimalDB(animalId,callback) {
     var authenticateUser = userCon.getAuthenticateUser();  
     console.log("animal id: "+animalId);
@@ -221,14 +101,9 @@ function deleteAnimalDB(animalId,callback) {
     deleteQuery.exec(function(err, results) {
         console.log("updated values: "+results);
         // update the 'authenticateUser' from mongo
-        userM.findOne({'email':authenticateUser.email}, function(err, doc) {
-            authenticateUser = doc;
-            console.log("doc: " + authenticateUser);
-            callback(err,authenticateUser);
-        });
+        userM.findOne({'email':authenticateUser.email}, userCon.updateUserCallback(err, doc, callback));
     });
 }
-
 function deleteAnimalNotifications(animalId,callback) {
     var authenticateUser = userCon.getAuthenticateUser();  
     console.log("animal id: "+animalId);
@@ -240,36 +115,10 @@ function deleteAnimalNotifications(animalId,callback) {
     deleteQuery.exec(function(err, results) {
         console.log("updated values: "+results);
         // update the 'authenticateUser' from mongo
-        userM.findOne({'email':authenticateUser.email}, function(err, doc) {
-            authenticateUser = doc;
-            console.log("doc: " + authenticateUser);
-            callback(err,authenticateUser);
-        });
+        userM.findOne({'email':authenticateUser.email}, userCon.updateUserCallback(err, doc, callback));
     });
 }
-
-exports.deleteAnimal = function(req,res){
-    console.log("delete animal");
-    var url_parts = url.parse(req.url, true);
-    var query = url_parts.query;
-    var animalId = query.animalId;
-    // delete animal from db
-    deleteAnimalDB(animalId, function(err,data) {
-        if (err)
-            res.send(500, "something went wrong: "+err);
-        else {
-            deleteAnimalNotifications(animalId, function(err,data) {
-            if (err)
-                res.send(500, "something went wrong: "+err);
-            else  // we return the updated user
-                res.status(200).json(data);
-            });
-        }
-    });
-};
-
 /* add new food */
-
 function createFoodObj(foodName,foodBrand,foodBagWeight,foodBagPrice,foodDailyUsage,foodDate) {
     return {
         foodName: foodName,
@@ -280,76 +129,7 @@ function createFoodObj(foodName,foodBrand,foodBagWeight,foodBagPrice,foodDailyUs
         foodDate : foodDate
     };
 }
-
-exports.addNewFood = function(req,res){
-    var authenticateUser = userCon.getAuthenticateUser();
-    var url_parts = url.parse(req.url, true);
-    var query = url_parts.query;
-    // parsing variables from url query
-    var animalId = query.currAnimalId;
-    var foodName = query.foodName;
-    var foodBrand = query.foodBrand;
-    var foodBagWeight = query.foodBagWeight;
-    var foodBagPrice = query.foodBagPrice;
-    var foodDailyUsage = query.foodDailyUsage;
-    var foodDate = query.foodDate;
-    // create food obj to add to db
-    var foodObj = createFoodObj(foodName,foodBrand,foodBagWeight,foodBagPrice,foodDailyUsage,foodDate);
-    // create a query to push this vaccination obj
-    var pushQuery = userM.findOneAndUpdate(
-                        { "_id" : authenticateUser._id, "animals._id" : animalId},
-                        { "$push" : {"animals.$.animalFood":foodObj}}
-                    );
-    // execute the query
-    addNewRec(pushQuery, function(err,data) {
-        if (err)
-            res.send(500, "something went wrong: "+err);
-        else {
-            // we return the updated user
-            res.status(200).json(data);
-        }
-    });
-};
-
-/* add new vaccination */
-
-function createVaccObj(recName,recReceivedDate,recExpDate) {
-    return {
-        vaccName: recName,
-        vaccDate: recReceivedDate,
-        vaccExp: recExpDate 
-    };
-}
-
-exports.addNewVacc = function(req,res){
-    var authenticateUser = userCon.getAuthenticateUser();
-    var url_parts = url.parse(req.url, true);
-    var query = url_parts.query;
-    // parsing variables from url query
-    var animalId = query.currAnimalId;
-    var vaccName = query.vaccName;
-    var vaccDate = query.vaccDate;
-    var vaccExp = query.vaccExp;
-    // create vaccination obj to add to db
-    var vaccObj = createVaccObj(vaccName,vaccDate,vaccExp);
-    // create a query to push this vaccination obj
-    var pushQuery = userM.findOneAndUpdate(
-                        { "_id" : authenticateUser._id, "animals._id" : animalId},
-                        { "$push" : {"animals.$.animalVaccination":vaccObj}}
-                    );
-    // execute the query
-    addNewRec(pushQuery, function(err,data) {
-        if (err)
-            res.send(500, "something went wrong: "+err);
-        else {
-            // we return the updated user
-            res.status(200).json(data);
-        }
-    });
-};
-
 /* add new care */
-
 function createCareObj(careType,careDate,careExp) {
     return {
         careType: careType,
@@ -357,34 +137,6 @@ function createCareObj(careType,careDate,careExp) {
         careExp: careExp 
     };
 }
-
-exports.addNewCare = function(req,res){
-    var authenticateUser = userCon.getAuthenticateUser();
-    var url_parts = url.parse(req.url, true);
-    var query = url_parts.query;
-    // parsing variables from url query
-    var animalId = query.currAnimalId;
-    var careType = query.careType;
-    var careDate = query.careDate;
-    var careExp = query.careExp;
-    // create care obj to add to db
-    var careObj = createCareObj(careType,careDate,careExp);
-    // create a query to push this vaccination obj
-    var pushQuery = userM.findOneAndUpdate(
-                        { "_id" : authenticateUser._id, "animals._id" : animalId},
-                        { "$push" : {"animals.$.animalCare":careObj}}
-                    );
-    // execute the query
-    addNewRec(pushQuery, function(err,data) {
-        if (err)
-            res.send(500, "something went wrong: "+err);
-        else {
-            // we return the updated user
-            res.status(200).json(data);
-        }
-    });
-};
-
 /* add new record : vaccination/care/food/servise */
 function addNewRec(pushQuery,callback) {
     var authenticateUser = userCon.getAuthenticateUser();
@@ -392,31 +144,9 @@ function addNewRec(pushQuery,callback) {
     query.exec(function(err, results) {
         console.log("Number of updated values: "+results);
         // update the 'authenticateUser' from mongo
-        userM.findOne({'email':authenticateUser.email}, function(err, doc2) {
-            authenticateUser = doc2;
-            console.log("doc: " + authenticateUser);
-            callback(err,authenticateUser);
-        });
+        userM.findOne({'email':authenticateUser.email}, userCon.updateUserCallback(err, doc, callback));
     });
 }
-
-
-
-/* callback instead of the few rows written several times..
-    I didnt try it yet, we need to decide what we are going to do with all the errors 
-*/
-
-/*
-function templateCallback(err,data) {
-    if (err)
-        res.send(500, "something went wrong: "+err);
-    else {
-        // we return the updated user
-        res.status(200).json(data);
-    }
-}
-*/
-
 function deleteItemComplexDetailFromDB(animalId,typeComplexDetail,itemId, callback) {
     var authenticateUser = userCon.getAuthenticateUser();
     var deleteItemQuery;   
@@ -440,14 +170,147 @@ function deleteItemComplexDetailFromDB(animalId,typeComplexDetail,itemId, callba
     deleteItemQuery.exec(function(err, results) {
         console.log("Number of updated values: "+results);
         // update the 'authenticateUser' from mongo
-        userM.findOne({'email':authenticateUser.email}, function(err, doc) {
-            authenticateUser = doc;
-            //console.log("doc: " + authenticateUser);
-            callback(err,authenticateUser);
-        });
+        userM.findOne({'email':authenticateUser.email}, userCon.updateUserCallback(err, doc, callback));
     });
 }
+/* add new vaccination */
+function createVaccObj(recName,recReceivedDate,recExpDate) {
+    return {
+        vaccName: recName,
+        vaccDate: recReceivedDate,
+        vaccExp: recExpDate 
+    };
+}
 
+/**** animal functions exported in ws ****/
+
+exports.uploadAnimalImg = function(req,res){
+        console.log("req files:"+req.files);
+        var dataForm = {};
+        var form = new formidable.IncomingForm();
+        var ImageSend = false;
+        var app = req.app;
+        form.parse(req, function(error, fields, files) {
+            dataForm = fields;  //save the fields information
+            console.log("this is files:"+files);
+            if (filesArrayIsEmpty(files))
+                ImageSend = true;
+        });
+        form.on('error', function(err) {
+            console.log("in form on error " + err);
+        });
+        form.on('end', function(error, fields, files) {
+           console.log("form on event");
+            if (ImageSend) {
+                console.log("image send is true");
+                var temp_path = this.openedFiles[0].path;
+                console.log("req files:"+form.path);
+                console.log("req files:"+req.files);
+                console.log("this is temp path:" + temp_path);
+                var stream = cloudinary.uploader.upload_stream(function(response) {
+                    console.log("in result from cloudinary");
+                    var urlImg=response.url;
+                    console.log("this is the image url:"+urlImg);
+                    res.json(urlImg);
+                });
+               var file_reader = fs.createReadStream(temp_path).pipe(stream);
+           }
+        });
+
+};
+exports.setNewAnimal = function(req,res){
+    console.log("animal controlle - setNewAnimal()");
+    var url_parts = url.parse(req.url, true);
+    var query1 = url_parts.query;
+    // same variables for all alarms
+    var animalName = query1.animalName;
+    var animalAge = query1.animalAge;
+    var animalWeight = query1.animalWeight;
+    var animalPic = query1.animalPic;
+    setAnimal(animalName,animalAge,animalWeight,animalPic, userCon.templateResponseCallback(err, doc));
+};
+exports.setAnimalField = function(req,res){
+    console.log("animal controller - setAnimalField()");
+    var url_parts = url.parse(req.url, true);
+    var query = url_parts.query;
+    var field = query.field;
+    var animalId = query.animalId;
+    var animalNewVal = query.animalNewVal;
+    // update animal field to db here!!
+    setField(field,animalId,animalNewVal, userCon.templateResponseCallback(err, doc));
+};
+exports.deleteAnimal = function(req,res){
+    console.log("delete animal");
+    var url_parts = url.parse(req.url, true);
+    var query = url_parts.query;
+    var animalId = query.animalId;
+    // delete animal from db
+    deleteAnimalDB(animalId, function(err,data) {
+        if (err)
+            res.status(500).json({"error": err});
+        else 
+            deleteAnimalNotifications(animalId, userCon.templateResponseCallback(err, doc));
+    });
+};
+exports.addNewFood = function(req,res){
+    var authenticateUser = userCon.getAuthenticateUser();
+    var url_parts = url.parse(req.url, true);
+    var query = url_parts.query;
+    // parsing variables from url query
+    var animalId = query.currAnimalId;
+    var foodName = query.foodName;
+    var foodBrand = query.foodBrand;
+    var foodBagWeight = query.foodBagWeight;
+    var foodBagPrice = query.foodBagPrice;
+    var foodDailyUsage = query.foodDailyUsage;
+    var foodDate = query.foodDate;
+    // create food obj to add to db
+    var foodObj = createFoodObj(foodName,foodBrand,foodBagWeight,foodBagPrice,foodDailyUsage,foodDate);
+    // create a query to push this vaccination obj
+    var pushQuery = userM.findOneAndUpdate(
+                        { "_id" : authenticateUser._id, "animals._id" : animalId},
+                        { "$push" : {"animals.$.animalFood":foodObj}}
+                    );
+    // execute the query
+    addNewRec(pushQuery, userCon.templateResponseCallback(err, data));
+};
+exports.addNewVacc = function(req,res){
+    var authenticateUser = userCon.getAuthenticateUser();
+    var url_parts = url.parse(req.url, true);
+    var query = url_parts.query;
+    // parsing variables from url query
+    var animalId = query.currAnimalId;
+    var vaccName = query.vaccName;
+    var vaccDate = query.vaccDate;
+    var vaccExp = query.vaccExp;
+    // create vaccination obj to add to db
+    var vaccObj = createVaccObj(vaccName,vaccDate,vaccExp);
+    // create a query to push this vaccination obj
+    var pushQuery = userM.findOneAndUpdate(
+                        { "_id" : authenticateUser._id, "animals._id" : animalId},
+                        { "$push" : {"animals.$.animalVaccination":vaccObj}}
+                    );
+    // execute the query
+    addNewRec(pushQuery, userCon.templateResponseCallback(err, data));
+};
+exports.addNewCare = function(req,res){
+    var authenticateUser = userCon.getAuthenticateUser();
+    var url_parts = url.parse(req.url, true);
+    var query = url_parts.query;
+    // parsing variables from url query
+    var animalId = query.currAnimalId;
+    var careType = query.careType;
+    var careDate = query.careDate;
+    var careExp = query.careExp;
+    // create care obj to add to db
+    var careObj = createCareObj(careType,careDate,careExp);
+    // create a query to push this vaccination obj
+    var pushQuery = userM.findOneAndUpdate(
+                        { "_id" : authenticateUser._id, "animals._id" : animalId},
+                        { "$push" : {"animals.$.animalCare":careObj}}
+                    );
+    addNewRec(pushQuery, userCon.templateResponseCallback(err, data));
+};
 exports.deleteItemComplexDetail = function(req,res){
     console.log("animal controller - deleteItemComplexDetail()");
     var url_parts = url.parse(req.url, true);
@@ -458,16 +321,8 @@ exports.deleteItemComplexDetail = function(req,res){
     var itemId = query.itemId;
     deleteItemComplexDetailFromDB(animalId,typeComplexDetail,itemId, function(err,data) {
         if (err)
-            res.send(500, "something went wrong: "+err);
-        else {
-            //  delete this item notification if exist
-            notificationCon.deleteNotiByConnectedDetailId(itemId, function(err,data) {
-                 if (err)
-                    res.send(500, "something went wrong: "+err);
-                else 
-                    // we return the updated user
-                    res.status(200).json(data);        
-            });
-        }
+            res.status(500).json({"error": err});
+        else  //  delete this item notification if exist
+            notificationCon.deleteNotiByConnectedDetailId(itemId, userCon.templateResponseCallback(err, data));
     });
 };
